@@ -10,7 +10,7 @@ Quick summary of what all I've done on my first 2.5 months of my 1st PUC (grade 
 		Made a sample website(not hosted) for the Maker-Space (code and other project details will be posted outside this md)
 		(this website was started purly for joining the maker-space (a project was compulsory))
 		
-	Became a part of the 'Terror bull team' (A team that had been participating in battle bots for years)(they are also the ppl who started the CFAL maker-space)
+	Became a part of the 'PY robotics'(A team that had been participating in battle bots for years)(they are also the ppl who started the CFAL maker-space)
 	    And Have been practicing/learning and having fun in building the bots
 	    We'll be having a competition in Russia called 'Bitva Robotov'(Battle of robots)
 	    
