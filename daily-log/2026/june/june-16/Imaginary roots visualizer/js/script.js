@@ -30,21 +30,30 @@ window.onload = function () {
     directionalLight.position.set(10, 20, 10);
     scene.add(directionalLight);
 
-    // --- Axes and Grid ---
-    const gridHelper = new THREE.GridHelper(400, 40, 0x4b5563, 0x374151);
+    // --- Axes and Grid --- 100x100 grid, one unit per cell
+    const gridHelper = new THREE.GridHelper(100, 100, 0x4b5563, 0x374151);
     gridHelper.position.y = 0;
     scene.add(gridHelper);
 
-    const axesHelper = new THREE.AxesHelper(200);
+    const axesHelper = new THREE.AxesHelper(50);
     scene.add(axesHelper);
 
-    // Base properties
-    const range = 5;
-    const segments = 100;
+    // Base properties — curve & surface both stretch to the grid's edge (±50)
+    const curveRange = 50;
+    const surfaceRange = 50;
+    const segments = 300;
+
+    // Clip planes keep the curves/surface from rocketing off into empty space
+    const clipPlaneTop = new THREE.Plane(new THREE.Vector3(0, -1, 0), 20); // Clip above y=20
+    const clipPlaneBottom = new THREE.Plane(new THREE.Vector3(0, 1, 0), 20); // Clip below y=-20
 
     // Reusable Geometries/Materials
-    const realCurveMaterial = new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 3 });
-    const imagCurveMaterial = new THREE.LineBasicMaterial({ color: 0x3b82f6, linewidth: 3 });
+    const realCurveMaterial = new THREE.LineBasicMaterial({
+        color: 0xef4444, linewidth: 3, clippingPlanes: [clipPlaneTop, clipPlaneBottom]
+    });
+    const imagCurveMaterial = new THREE.LineBasicMaterial({
+        color: 0x3b82f6, linewidth: 3, clippingPlanes: [clipPlaneTop, clipPlaneBottom]
+    });
 
     const realCurveGeometry = new THREE.BufferGeometry();
     const imagCurveGeometry = new THREE.BufferGeometry();
@@ -55,10 +64,8 @@ window.onload = function () {
     scene.add(imagCurve);
 
     // Fast Surface via PlaneGeometry vertex manipulation
-    const surfaceGeometry = new THREE.PlaneGeometry(range * 2, range * 2, 60, 60);
+    const surfaceGeometry = new THREE.PlaneGeometry(surfaceRange * 2, surfaceRange * 2, 100, 100);
     surfaceGeometry.rotateX(-Math.PI / 2); // Lay flat on XZ
-    const clipPlaneTop = new THREE.Plane(new THREE.Vector3(0, -1, 0), 5); // Clip above y=5
-    const clipPlaneBottom = new THREE.Plane(new THREE.Vector3(0, 1, 0), 5); // Clip below y=-5
 
     const surfaceMaterial = new THREE.MeshPhongMaterial({
         color: 0x8b5cf6,
@@ -113,7 +120,7 @@ window.onload = function () {
             // 1. Update Real Curve (z = 0)
             const realPts = [];
             for (let i = 0; i <= segments; i++) {
-                let x = -range + (i / segments) * (range * 2);
+                let x = -curveRange + (i / segments) * (curveRange * 2);
                 let y = a * (x * x) + b * x + c;
                 realPts.push(new THREE.Vector3(x, y, 0));
             }
@@ -122,7 +129,7 @@ window.onload = function () {
             // 2. Update Imaginary Curve (slice through vertex x = xv)
             const imagPts = [];
             for (let i = 0; i <= segments; i++) {
-                let z = -range + (i / segments) * (range * 2);
+                let z = -curveRange + (i / segments) * (curveRange * 2);
                 // Output is purely real when passing exactly through the vertex in the Z direction
                 let y = a * (xv * xv - z * z) + b * xv + c;
                 imagPts.push(new THREE.Vector3(xv, y, z));
