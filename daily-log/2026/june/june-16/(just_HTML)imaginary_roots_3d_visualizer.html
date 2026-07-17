@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizing Imaginary Roots</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #111827;
+            color: #f3f4f6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+        #ui-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(31, 41, 55, 0.85);
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+            border: 1px solid #374151;
+            width: 340px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            pointer-events: auto;
+        }
+        h1 {
+            margin: 0 0 5px 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #60a5fa;
+        }
+        #equation-display {
+            font-size: 1.1rem;
+            font-family: monospace;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+        .color-box {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .controls {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #4b5563;
+        }
+        .slider-group {
+            margin-bottom: 12px;
+        }
+        .slider-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        input[type="range"] {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+        input[type="number"] {
+            width: 60px;
+            background: rgba(17, 24, 39, 0.9);
+            border: 1px solid #4b5563;
+            color: #f3f4f6;
+            padding: 4px;
+            border-radius: 4px;
+            font-family: monospace;
+            text-align: right;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .panel-header h1 {
+            margin: 0;
+        }
+        #toggle-ui-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0 5px;
+            border-radius: 4px;
+        }
+        #toggle-ui-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .hidden {
+            display: none !important;
+        }
+        .help-text {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: #9ca3af;
+            line-height: 1.4;
+        }
+    </style>
+    <!-- Load Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Load OrbitControls -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+    <div id="ui-panel">
+        <div class="panel-header">
+            <h1>General Quadratic</h1>
+            <button id="toggle-ui-btn" title="Toggle UI">−</button>
+        </div>
+        
+        <div id="ui-content">
+            <div id="equation-display">f(x) = x² + 1</div>
+            
+            <div class="legend-item">
+                <div class="color-box" style="background-color: #ef4444;"></div>
+                <span><strong>Red Curve:</strong> Real Output</span>
+            </div>
+            <div class="legend-item">
+                <div class="color-box" style="background-color: #3b82f6;"></div>
+                <span><strong>Blue Curve:</strong> Imaginary Slice at Vertex</span>
+            </div>
+            <div class="legend-item">
+                <div class="color-box" style="background-color: #10b981; border-radius: 50%;"></div>
+                <span><strong>Green Spheres:</strong> Roots (Real or Complex)</span>
+            </div>
+            <div class="legend-item">
+                <div class="color-box" style="background-color: rgba(167, 139, 250, 0.4);"></div>
+                <span><strong>Purple Surface:</strong> Full Saddle Surface</span>
+            </div>
+
+            <div class="controls">
+                <div class="slider-group">
+                    <label><span>Coefficient <strong>a</strong>:</span></label>
+                    <div class="input-row">
+                        <input type="range" id="slider-a" min="-5" max="5" step="0.1" value="1">
+                        <input type="number" id="input-a" min="-5" max="5" step="0.1" value="1">
+                    </div>
+                </div>
+                <div class="slider-group">
+                    <label><span>Coefficient <strong>b</strong>:</span></label>
+                    <div class="input-row">
+                        <input type="range" id="slider-b" min="-5" max="5" step="0.1" value="0">
+                        <input type="number" id="input-b" min="-5" max="5" step="0.1" value="0">
+                    </div>
+                </div>
+                <div class="slider-group">
+                    <label><span>Constant <strong>c</strong>:</span></label>
+                    <div class="input-row">
+                        <input type="range" id="slider-c" min="-5" max="5" step="0.1" value="1">
+                        <input type="number" id="input-c" min="-5" max="5" step="0.1" value="1">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="help-text">
+                Notice how the roots leave the Real Axis (X) and move into the Imaginary Axis (Z) when the red parabola stops crossing the floor.
+            </div>
+        </div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <script>
+        window.onload = function () {
+            // --- Scene Setup ---
+            const container = document.getElementById('canvas-container');
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color('#111827');
+
+            const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(6, 5, 8);
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            // Enable clipping so the surface doesn't block the view
+            renderer.localClippingEnabled = true;
+            container.appendChild(renderer.domElement);
+
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.target.set(0, 0, 0);
+
+            // --- Lighting ---
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 10);
+            scene.add(directionalLight);
+
+            // --- Axes and Grid ---
+            const gridHelper = new THREE.GridHelper(12, 24, 0x4b5563, 0x374151);
+            gridHelper.position.y = 0;
+            scene.add(gridHelper);
+
+            const axesHelper = new THREE.AxesHelper(4);
+            scene.add(axesHelper);
+
+            // Base properties
+            const range = 5;
+            const segments = 100;
+            
+            // Reusable Geometries/Materials
+            const realCurveMaterial = new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 3 });
+            const imagCurveMaterial = new THREE.LineBasicMaterial({ color: 0x3b82f6, linewidth: 3 });
+            
+            const realCurveGeometry = new THREE.BufferGeometry();
+            const imagCurveGeometry = new THREE.BufferGeometry();
+            
+            const realCurve = new THREE.Line(realCurveGeometry, realCurveMaterial);
+            const imagCurve = new THREE.Line(imagCurveGeometry, imagCurveMaterial);
+            scene.add(realCurve);
+            scene.add(imagCurve);
+
+            // Fast Surface via PlaneGeometry vertex manipulation
+            const surfaceGeometry = new THREE.PlaneGeometry(range * 2, range * 2, 60, 60);
+            surfaceGeometry.rotateX(-Math.PI / 2); // Lay flat on XZ
+            const clipPlaneTop = new THREE.Plane(new THREE.Vector3(0, -1, 0), 5); // Clip above y=5
+            const clipPlaneBottom = new THREE.Plane(new THREE.Vector3(0, 1, 0), 5); // Clip below y=-5
+            
+            const surfaceMaterial = new THREE.MeshPhongMaterial({
+                color: 0x8b5cf6,
+                transparent: true,
+                opacity: 0.35,
+                side: THREE.DoubleSide,
+                flatShading: true,
+                clippingPlanes: [clipPlaneTop, clipPlaneBottom]
+            });
+            const surface = new THREE.Mesh(surfaceGeometry, surfaceMaterial);
+            scene.add(surface);
+
+            // Roots
+            const rootGeometry = new THREE.SphereGeometry(0.15, 32, 32);
+            const rootMaterial = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+            const glowMaterial = new THREE.MeshBasicMaterial({ color: 0x10b981, transparent: true, opacity: 0.3 });
+            
+            const root1 = new THREE.Mesh(rootGeometry, rootMaterial);
+            const root2 = new THREE.Mesh(rootGeometry, rootMaterial);
+            const glow1 = new THREE.Mesh(new THREE.SphereGeometry(0.25, 32, 32), glowMaterial);
+            const glow2 = new THREE.Mesh(new THREE.SphereGeometry(0.25, 32, 32), glowMaterial);
+            
+            scene.add(root1); scene.add(root2);
+            scene.add(glow1); scene.add(glow2);
+
+            // --- Math Logic & Update ---
+        function updateGraph() {
+            // Get slider values
+            let a = parseFloat(document.getElementById('slider-a').value);
+            let b = parseFloat(document.getElementById('slider-b').value);
+            let c = parseFloat(document.getElementById('slider-c').value);
+
+            // Prevent a from being exactly 0 to maintain quadratic properties
+            if(Math.abs(a) < 0.01) a = a >= 0 ? 0.01 : -0.01;
+
+            // Format Equation
+            let eq = "f(x) = ";
+            if (a === 1) eq += "x²";
+                else if (a === -1) eq += "-x²";
+                else eq += a + "x²";
+                
+                if (b > 0) eq += " + " + b + "x";
+                else if (b < 0) eq += " - " + Math.abs(b) + "x";
+                
+                if (c > 0) eq += " + " + c;
+                else if (c < 0) eq += " - " + Math.abs(c);
+                
+                document.getElementById('equation-display').innerText = eq;
+
+                const xv = -b / (2 * a); // Vertex X position
+
+                // 1. Update Real Curve (z = 0)
+                const realPts = [];
+                for (let i = 0; i <= segments; i++) {
+                    let x = -range + (i / segments) * (range * 2);
+                    let y = a * (x * x) + b * x + c;
+                    realPts.push(new THREE.Vector3(x, y, 0));
+                }
+                realCurveGeometry.setFromPoints(realPts);
+
+                // 2. Update Imaginary Curve (slice through vertex x = xv)
+                const imagPts = [];
+                for (let i = 0; i <= segments; i++) {
+                    let z = -range + (i / segments) * (range * 2);
+                    // Output is purely real when passing exactly through the vertex in the Z direction
+                    let y = a * (xv * xv - z * z) + b * xv + c;
+                    imagPts.push(new THREE.Vector3(xv, y, z));
+                }
+                imagCurveGeometry.setFromPoints(imagPts);
+
+                // 3. Update Surface
+                const pos = surfaceGeometry.attributes.position;
+                for (let i = 0; i < pos.count; i++) {
+                    let x = pos.getX(i);
+                    let z = pos.getZ(i);
+                    // Real part of f(x + iz)
+                    let y = a * (x * x - z * z) + b * x + c;
+                    pos.setY(i, y);
+                }
+                pos.needsUpdate = true;
+                surfaceGeometry.computeVertexNormals();
+
+                // 4. Update Roots
+                const discriminant = (b * b) - (4 * a * c);
+                
+                if (discriminant >= 0) {
+                    // Real Roots (on X axis)
+                    let r1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+                    let r2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+                    root1.position.set(r1, 0, 0);
+                    root2.position.set(r2, 0, 0);
+                } else {
+                    // Complex Roots (on Z axis, offset by vertex X)
+                    let zVal = Math.sqrt(-discriminant) / (2 * a);
+                    root1.position.set(xv, 0, zVal);
+                    root2.position.set(xv, 0, -zVal);
+                }
+                
+                // Snap glows to roots
+            glow1.position.copy(root1.position);
+            glow2.position.copy(root2.position);
+        }
+
+        // --- Input Synchronization & Event Listeners ---
+        function setupInputSync(sliderId, inputId) {
+            const slider = document.getElementById(sliderId);
+            const numberInput = document.getElementById(inputId);
+            
+            slider.addEventListener('input', () => {
+                numberInput.value = slider.value;
+                updateGraph();
+            });
+            
+            numberInput.addEventListener('input', () => {
+                // Update slider when manual input changes
+                slider.value = numberInput.value;
+                updateGraph();
+            });
+        }
+
+        setupInputSync('slider-a', 'input-a');
+        setupInputSync('slider-b', 'input-b');
+        setupInputSync('slider-c', 'input-c');
+
+        // --- UI Toggle Logic ---
+        document.getElementById('toggle-ui-btn').addEventListener('click', function() {
+            const content = document.getElementById('ui-content');
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                this.innerText = '−';
+            } else {
+                content.classList.add('hidden');
+                this.innerText = '+';
+            }
+        });
+
+        // Initial Draw
+        updateGraph();
+
+        // --- Labels for Axes ---
+            function createTextSprite(message, color) {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = 256;
+                canvas.height = 128;
+                context.font = 'Bold 40px Arial';
+                context.fillStyle = color;
+                context.textAlign = 'center';
+                context.fillText(message, 128, 64);
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+                const sprite = new THREE.Sprite(spriteMaterial);
+                sprite.scale.set(1.5, 0.75, 1);
+                return sprite;
+            }
+
+            const labelX = createTextSprite('Real Input (X)', '#ef4444');
+            labelX.position.set(5.5, 0, 0);
+            scene.add(labelX);
+
+            const labelZ = createTextSprite('Imag Input (Z)', '#3b82f6');
+            labelZ.position.set(0, 0, 5.5);
+            scene.add(labelZ);
+            
+            const labelY = createTextSprite('Output = 0', '#9ca3af');
+            labelY.position.set(-3, 0, -3);
+            scene.add(labelY);
+
+
+            // --- Animation Loop ---
+            window.addEventListener('resize', onWindowResize, false);
+
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+
+            let autoRotate = true;
+            controls.addEventListener('start', () => { autoRotate = false; });
+
+            function animate() {
+                requestAnimationFrame(animate);
+                if (autoRotate) {
+                    scene.rotation.y += 0.0015;
+                }
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+        };
+    </script>
+</body>
+</html>
