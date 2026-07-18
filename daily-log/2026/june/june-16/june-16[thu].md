@@ -1,4 +1,4 @@
-#Made a 3d **visualization** of seeing **imaginary roots**#
+## Made a 3d **visualization** of seeing **imaginary roots*#*
 (been looking into this for a while now, just doubts and ideas here and there)
 
 I initially tried with *desmos* (a 2d graph mapping website) didnt get a good sense or idea
