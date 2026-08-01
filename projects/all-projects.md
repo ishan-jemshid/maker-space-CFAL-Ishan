@@ -4,7 +4,7 @@
 ---
 ---
 
-### Maker-Space-*Website*
+#### Maker-Space-*Website*
 
 > Status  - **Incomplete** (left)
 > Started - June-06-2026	
@@ -20,10 +20,13 @@
 	
 	Eventually Everyone found their own intrests and went on their way for their own other projects or just left.
 
+*Aug-1-2026*
+
+	Vineeth one of them is thinking of working on it again, looking for ppl who might continue working on it again. I probably won't join but if they actually get things going I would hop on in
 
 ---
 
-### Cube-Art
+#### Cube-Art
 
 > Status  - **Done for now** can be made better but the intresting part is done
 > Started - Aug-28-2026
@@ -46,15 +49,43 @@
 
 ## Sense_Of_Math
 
-> Status  - **Slow continous progress** Just a few things here and there when i feel like it
+> Status  - **Slow continuous progress** Just a few things here and there when i feel like it
+> Started - Been doing bits from a long.. time don't know exactly when i started, in git it was on *july-2026*
 
-> Started - 
+	Make intuitive sense of math equations that are taught as "formulas"
+	
 
+### Imaginary-Roots-of-a-Quadratic
 
+> Status  - **Done**
+> Started - July-16-2026
 
+#### Logs:-
 
+*Aug-1-2026*
 
+	Since I heard of Imaginary roots I've been confuesed obout how to be able to see/understand its formation
+	I tried directly plotinging it and had found no quick pattern, Eventually went to Gemini and got a good way of seeing it.
+	Tweaked the visualizer till I got somthing im proud of
+	
+### Trig-Functions-dependent-on-Multiple-Variables
+	
+> Status   - **Done**
+> Statrted - July-19-2026
 
+#### Logs:-
+
+*Aug-1-2026*
+
+	I had found Such trig functons hard to understand, so i tried making a 3D graphing sim
+	I got a way better result than i expected. hence it's here
+
+---
+
+## Hammock
+
+> Status  - **Planned** started/kinda
+> Started - nope, Made a rope 🫤️
 
 
 
