@@ -6,33 +6,31 @@ void setup() {
   Serial.begin(9600);
   myESC.attach(9);
 
-  Serial.println("--- ESC Calibration ---");
-  Serial.println("1. Unplug the ESC battery.");
+  Serial.println("ESC_CALLIBERATION");
   Serial.println("5. Press Enter in Serial Monitor when if the ESC battery is unplugged");
+  
   while (Serial.available() == 0) {} // Wait for user to press Enter
   while (Serial.available() > 0) { Serial.read(); } // Clear buffer
   
-  Serial.println("2. Sending MAX throttle (2000 us)...");
-  myESC.writeMicroseconds(2050);
+  Serial.println("Sending-Max-Throttle");
+  myESC.writeMicroseconds(2050);  //2050 instead of 2000 since during testing closest I could get it to max out was at 2050
   
-  Serial.println("3. NOW plug in the ESC battery!");
-  Serial.println("4. Wait for the initial musical beeps (approx 3-5 seconds)...");
-  Serial.println("5. Press Enter in Serial Monitor when you hear the beeps.");
+  Serial.println("3. Plug in the ESC battery");
+  Serial.println("5. Press Enter in Serial Monitor after the beeps.");
 
   while (Serial.available() == 0) {} // Wait for user to press Enter
   while (Serial.available() > 0) { Serial.read(); } // Clear buffer
 
   Serial.println("Sending MIN throttle (1000 us)...");
 //  delay(5000);
-  myESC.writeMicroseconds(942);
+  myESC.writeMicroseconds(942); //942 instead of 1000 since during testing I could get the min to be at exactly 942
   
-  Serial.println("Wait for confirmation beeps... Calibration Complete!");
-  delay(3000);
+  Serial.println("Calibration Complete");
 }
 
 void loop() {
   
-  Serial.println("Speed : ");
+  Serial.print("Speed : ");
   while (Serial.available() == 0) {}
 
   int speed = Serial.parseInt();
